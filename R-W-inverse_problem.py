@@ -12,12 +12,12 @@ w_i = dde.Variable(1.0) # Variable para ajustar
 #funciones para extraer valores de la sulucion y agregarlos al 
 #entrenamiento para ajustar las w
 def gen_traindata_r(N):
-    yvals = np.linspace(-0.99, 0.99, N).reshape(N, 1)
+    yvals = (np.linspace(-0.99, 0.99, N)).reshape(N, 1)
     phi_vals = func_r(yvals)
     return yvals, phi_vals
 
 def gen_traindata_i(N):
-    yvals = np.linspace(-0.99, 0.99, N).reshape(N, 1)
+    yvals = (np.linspace(-0.99, 0.99, N)).reshape(N, 1)
     phi_vals = func_i(yvals)
     return yvals, phi_vals
 
@@ -35,15 +35,15 @@ def func_i(y):
 #Ecuacion diferencial
 def PDE(y,x):
     # funcion real e imaginaria
-    u, v = y[:, 0:1], y[:, 1:2]
+    u, v = x[:, 0:1], x[:, 1:2]
 
     #derivadas de cada funcion
-    u_y = dde.grad.jacobian(y, x, i=0, j=0)
-    v_y = dde.grad.jacobian(y, x, i=1, j=0)
-    u_yy = dde.grad.hessian(y, x, component=0, i=0, j=0)
-    v_yy = dde.grad.hessian(y, x, component=1, i=0, j=0)  
+    u_y = dde.grad.jacobian(x, y, i=0, j=0)
+    v_y = dde.grad.jacobian(x, y, i=1, j=0)
+    u_yy = dde.grad.hessian(x, y, component=0, i=0, j=0)
+    v_yy = dde.grad.hessian(x, y, component=1, i=0, j=0)  
 
-    Y = x[:,0:1] #Variable independiente (respecto a la que se deriva)
+    Y = y[:,0:1] #Variable independiente (respecto a la que se deriva)
 
     # Division en parte real e imaginaria de la ecuaciones
     f_r = ( (1 - Y**2)**2 * u_yy
