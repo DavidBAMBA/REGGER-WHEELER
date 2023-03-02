@@ -94,20 +94,24 @@ losshistory, train_state = model.train(callbacks=[variable])
 
 #Graficas
 dde.utils.external.plot_loss_history(losshistory)
+
 t = geom.uniform_points(1000)
 y = model.predict(t)
-W_exp = 1/np.sqrt(2) # w= \pm 1 -i(n+1/2) usando n=0 por que si :V
+W_exp = 1/2 # w= \pm 1 -i(n+1/2) usando n=0 por que si :V
 
 plt.figure()
-plt.plot(t,y,label="PINN")
-plt.plot(t,func_r,'o',label="Exacta u")
-plt.plot(t,func_i,'o',label="Exacta v")
+plt.plot(t, y[:, 0] ,"-", label="real_solution")
+plt.plot(t, y[:, 1],"-", label="imaginary solution")
+
+#plt.plot(y_values, func_r,'-',label="Exacta u")
+#plt.plot(y_values, func_i,'-',label="Exacta v")
 plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
 plt.show()
-'''
+
+w_r_est, w_i_est = variable.get_value()
+W_est = w_r_est** + w_i_est**2
 print('Expected w^2 Value: ', W_exp)
-print('w^2 Value: ', variable.get_value())
-print('Error: ', 100*abs((W_exp)-variable.get_value()[0])/(W_exp), ' %')
-'''
+print('w^2 Value: ', W_est)
+print('Error: ', 100*abs((W_exp)-W_est)/(W_exp), ' %')
