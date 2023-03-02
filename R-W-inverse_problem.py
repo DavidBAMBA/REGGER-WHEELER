@@ -21,16 +21,14 @@ def gen_traindata_i(N):
     phi_vals = func_i(yvals)
     return yvals, phi_vals
 
-
 #Soluciones analiticas real e imaginaria 
 def func_r(y):
-    x = np.arctanh(y)
-    return np.sqrt(np.cosh(x)) * np.cos(np.log(np.cosh(x))) #* np.sinh(y)
+    x = tf.math.atanh(y)
+    return tf.math.sqrt(tf.cosh(x)) * tf.math.cos(tf.math.log(tf.math.cosh(x))) #* np.sinh(y)
 
 def func_i(y):
-    x = np.arctanh(y)
-    return np.sqrt(np.cosh(x)) * np.sin(np.log(np.cosh(x))) #* np.sinh(y)
-
+    x = tf.math.atanh(y)
+    return tf.math.sqrt(tf.cosh(x)) * tf.math.sin(tf.math.log(tf.math.cosh(x))) #* np.sinh(y)
 
 #Ecuacion diferencial
 def PDE(y,x):
@@ -57,14 +55,12 @@ def PDE(y,x):
 
     return  [f_r, f_i] 
 
-
 #Definicion del intervalo de solucion
 geom = dde.geometry.Interval(-0.99,0.99)
 
 #condiciones de frontera
 ic_u = dde.icbc.DirichletBC(geom, func_r,  lambda _,on_boundary: on_boundary, component=0)
 ic_v = dde.icbc.DirichletBC(geom, func_i,  lambda _,on_boundary: on_boundary, component=1)
-
 
 #datos experimentales para hayar el parametro
 y_values, u_values = gen_traindata_r(50) 
@@ -73,18 +69,15 @@ exp_data_r = dde.icbc.PointSetBC(y_values, u_values, component=0) # valores w re
 y_values, v_values = gen_traindata_i(50)
 exp_data_i = dde.icbc.PointSetBC(y_values, v_values, component=1) #valores w imaginario
 
-
 #Datos De entrenamiento
 data = dde.data.PDE(geom, PDE, [ic_u, ic_v, exp_data_r, exp_data_i], 100, 20, num_test=100,
                     train_distribution='pseudo', anchors=y_values)
 
-
 #Red neuronal
-layer_size = [2] + [100] * 4 + [2]
+layer_size = [1] + [100] * 4 + [2]
 activation = 'tanh'
 initializer = "Glorot normal"
 net = dde.nn.FNN(layer_size, activation, initializer)
-
 
 #Modelo
 model = dde.Model(data, net)
@@ -99,9 +92,8 @@ dde.optimizers.config.set_LBFGS_options(maxiter=10000)
 model.compile("L-BFGS", external_trainable_variables=[w_i,w_r])
 losshistory, train_state = model.train(callbacks=[variable])
 
-
 #Graficas
-dde.utils.external.plot_loss_history(loss_history)
+dde.utils.external.plot_loss_history(losshistory)
 t = geom.uniform_points(1000)
 y = model.predict(t)
 W_exp = 1/np.sqrt(2) # w= \pm 1 -i(n+1/2) usando n=0 por que si :V
@@ -114,6 +106,8 @@ plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
 plt.show()
+'''
 print('Expected w^2 Value: ', W_exp)
 print('w^2 Value: ', variable.get_value())
 print('Error: ', 100*abs((W_exp)-variable.get_value()[0])/(W_exp), ' %')
+'''
