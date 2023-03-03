@@ -5,19 +5,19 @@ import matplotlib.pyplot as plt
 
 #parametros a encontrar
 w_r = dde.Variable(2.0) # Variable para ajustar
-w_i = dde.Variable(1.0) # Variable para ajustar
+w_i = dde.Variable(-1.0) # Variable para ajustar
 #frecuencia como suma de real e imaginaria
 #W2 = w_r**2 + w_i**2
 
 #funciones para extraer valores de la sulucion y agregarlos al 
 #entrenamiento para ajustar las w
 def gen_traindata_r(N):
-    yvals = (np.linspace(-0.99, 0.99, N)).reshape(N, 1)
+    yvals = (np.linspace(-0.9, 0.9, N)).reshape(N, 1)
     phi_vals = func_r(yvals)
     return yvals, phi_vals
 
 def gen_traindata_i(N):
-    yvals = (np.linspace(-0.99, 0.99, N)).reshape(N, 1)
+    yvals = (np.linspace(-0.9, 0.9, N)).reshape(N, 1)
     phi_vals = func_i(yvals)
     return yvals, phi_vals
 
@@ -63,10 +63,10 @@ ic_u = dde.icbc.DirichletBC(geom, func_r,  lambda _,on_boundary: on_boundary, co
 ic_v = dde.icbc.DirichletBC(geom, func_i,  lambda _,on_boundary: on_boundary, component=1)
 
 #datos experimentales para hayar el parametro
-y_values, u_values = gen_traindata_r(50) 
+y_values, u_values = gen_traindata_r(500) 
 exp_data_r = dde.icbc.PointSetBC(y_values, u_values, component=0) # valores w real 
 
-y_values, v_values = gen_traindata_i(50)
+y_values, v_values = gen_traindata_i(500)
 exp_data_i = dde.icbc.PointSetBC(y_values, v_values, component=1) #valores w imaginario
 
 #Datos De entrenamiento
@@ -100,18 +100,18 @@ y = model.predict(t)
 W_exp = 1/2 # w= \pm 1 -i(n+1/2) usando n=0 por que si :V
 
 plt.figure()
-plt.plot(t, y[:, 0] ,"-", label="real_solution")
+plt.plot(t, y[:, 0],"-", label="real_solution")
 plt.plot(t, y[:, 1],"-", label="imaginary solution")
 
-#plt.plot(y_values, func_r,'-',label="Exacta u")
-#plt.plot(y_values, func_i,'-',label="Exacta v")
+#plt.plot(t, func_r,'-',label="Exacta u")
+#plt.plot(t, func_i,'-',label="Exacta v")
 plt.xlabel('x')
 plt.ylabel('y')
 plt.legend()
 plt.show()
 
 w_r_est, w_i_est = variable.get_value()
-W_est = w_r_est** + w_i_est**2
-print('Expected w^2 Value: ', W_exp)
-print('w^2 Value: ', W_est)
-print('Error: ', 100*abs((W_exp)-W_est)/(W_exp), ' %')
+print('w_r_ = ',w_r_est, "  w_i =", w_i_est)
+W_r_est = 1/2
+W_i_est = -1/2
+print('W_r_est = ',W_r_est, "  W_i_est =", W_i_est)
