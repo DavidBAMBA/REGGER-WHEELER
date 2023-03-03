@@ -70,7 +70,7 @@ y_values, v_values = gen_traindata_i(500)
 exp_data_i = dde.icbc.PointSetBC(y_values, v_values, component=1) #valores w imaginario
 
 #Datos De entrenamiento
-data = dde.data.PDE(geom, PDE, [ic_u, ic_v, exp_data_r, exp_data_i], 100, 20, num_test=100,
+data = dde.data.PDE(geom, PDE, [ic_u, ic_v, exp_data_r, exp_data_i], 1000, 200, num_test=100,
                     train_distribution='pseudo', anchors=y_values)
 
 #Red neuronal
