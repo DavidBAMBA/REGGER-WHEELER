@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #parametros a encontrar
 w_r = dde.Variable(1.0) # Variable para ajustar
 w_i = dde.Variable(-1.0) # Variable para ajustar
-bdr_inf = 0.9
+bdr_inf = 0.9999
 
 #funciones para extraer valores de la sulucion y agregarlos al 
 #entrenamiento para ajustar las w
@@ -62,10 +62,10 @@ ic_u = dde.icbc.DirichletBC(geom, func_r,  lambda _,on_boundary: on_boundary, co
 ic_v = dde.icbc.DirichletBC(geom, func_i,  lambda _,on_boundary: on_boundary, component=1)
 
 #datos experimentales para hayar el parametro
-y_values, u_values = gen_traindata_r(50) 
+y_values, u_values = gen_traindata_r(500) 
 exp_data_r = dde.icbc.PointSetBC(y_values, u_values, component=0) # valores w real 
 
-y_values, v_values = gen_traindata_i(50)
+y_values, v_values = gen_traindata_i(500)
 exp_data_i = dde.icbc.PointSetBC(y_values, v_values, component=1) #valores w imaginario
 
 #Datos De entrenamiento
