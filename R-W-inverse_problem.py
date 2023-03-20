@@ -22,13 +22,26 @@ def gen_traindata_i(N):
 
 #Soluciones analiticas real e imaginaria 
 def func_r(y):
+    '''
+    Soluciones dependiendo el modo 
+    n = 0 : (tf.math.sqrt(tf.math.cosh(x)) * tf.math.cos(tf.math.log(tf.math.cosh(x)) * 0.5))
+    n = 1 : n(0) * tf.math.sinh(x) 
+    n = 2 : n(0) * (3.0*(tf.math.sinh(x)**2) + 1.0) //// im : tf.math.sinh(x)**2
+    n = 3 : n(0) * (5/3 * tf.math.sinh(x)**3 + tf.math.sinh(x))
+    '''
     x = tf.math.atanh(y)
-    return  (tf.math.sqrt(tf.math.cosh(x)) * tf.math.cos(tf.math.log(tf.math.cosh(x)) * 0.5))# * P_n (sinh(y))
+    return  (tf.math.sqrt(tf.math.cosh(x)) * tf.math.cos(tf.math.log(tf.math.cosh(x)) * 0.5)) * (3.0*(tf.math.sinh(x)**2) + 1.0)
 
 def func_i(y):
+    '''
+    Soluciones dependiendo el modo 
+    n = 0 : (tf.math.sqrt(tf.math.cosh(x)) * tf.math.sin(tf.math.log(tf.math.cosh(x)) * 0.5))
+    n = 1 : n(0) * tf.math.sinh(x) 
+    n = 2 : n(0) * tf.math.sinh(x)**2
+    n = 3 : n(0) * (1/3 * tf.math.sinh(x)**3)
+    '''
     x = tf.math.atanh(y)
-    return  tf.math.sqrt(tf.math.cosh(x)) * tf.math.sin(tf.math.log(tf.math.cosh(x)) * 0.5)#* P_n ( sinh(y) )
-
+    return  tf.math.sqrt(tf.math.cosh(x)) * tf.math.sin(tf.math.log(tf.math.cosh(x)) * 0.5) * tf.math.sinh(x)**2
 #Ecuacion diferencial
 def PDE(y,x):
     # funcion real e imaginaria
@@ -69,7 +82,7 @@ y_values, v_values = gen_traindata_i(50)
 exp_data_i = dde.icbc.PointSetBC(y_values, v_values, component=1) #valores w imaginario
 
 #Datos De entrenamiento
-data = dde.data.PDE(geom, PDE, [ic_u, ic_v, exp_data_r, exp_data_i], 100, 30, num_test=600,
+data = dde.data.PDE(geom, PDE, [ic_u, ic_v ,exp_data_r, exp_data_i], num_domain=100, num_boundary=30, num_test=200,
                     train_distribution='pseudo', anchors=y_values)
 
 #Red neuronal
@@ -86,7 +99,7 @@ variable = dde.callbacks.VariableValue([w_r,w_i], period=1000)
 #pde_resampler = dde.callbacks.PDEPointResampler(period=100)
 
 model.compile("adam", lr=1e-3, external_trainable_variables=[w_i,w_r])
-loss_history, train_state = model.train(iterations=20000, callbacks=[variable])
+loss_history, train_state = model.train(iterations=10000, callbacks=[variable])
 
 # Optimizador L-BFGS para ajustar la ecuación diferencial (no ajusta w^2)
 dde.optimizers.config.set_LBFGS_options(maxiter=10000)
@@ -94,8 +107,9 @@ model.compile("L-BFGS", external_trainable_variables=[w_i,w_r])
 losshistory, train_state = model.train(callbacks=[variable])
 
 #Parametros calculados
+N = 2
 W_r_esp = 1/2
-W_i_esp = -3/2
+W_i_esp = -(N + 1/2)
 print('Esperados: ','W_r_est = ',W_r_esp, "  W_i_est =", W_i_esp)
 w_r_est, w_i_est = variable.get_value()
 print('Predichos: ','w_r_ = ',w_r_est, "  w_i =", w_i_est)
@@ -120,7 +134,7 @@ plt.figure()
 plt.plot(x, f_u, "-", label="u_true")
 plt.plot(x, u_pred, "--", label="u_pred")
 
-plt.title("Solutions to Regger-Wheeler Quasinormal Modes real")
+plt.title("Solutions to Regger-Wheeler Quasinormal Modes real part")
 plt.xlabel("y")
 plt.ylabel('{\phy}')
 plt.legend()
@@ -149,3 +163,5 @@ plt.legend()
 plt.grid()
 plt.savefig("both grafics")
 plt.show()
+
+
